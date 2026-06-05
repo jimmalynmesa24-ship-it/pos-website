@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dashboard</title>
+<style>
+/* LIGHT THEME ONLY - removed all other themes */
+:root {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --accent: #ee4d2d;
+  --text: #1a1d23;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --success: #16a34a;
+  --hover: #f3f4f6;
+  --danger: #dc2626;
+  --warning: #d97706;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+.container { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+h1 { font-size: 24px; font-weight: 700; }
+.icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--accent); border: none; cursor: pointer; font-weight: 600; min-height: 44px; padding: 0 20px; border-radius: 8px; color: #fff; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+.btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-ghost:hover { background: var(--hover); border-color: var(--accent); }
+.btn-danger { background: var(--danger); }
+.btn-success { background: var(--success); }
+.btn-warning { background: var(--warning); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); transition: all 0.2s; }
+.stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.stat-icon.accent { background: rgba(238, 77, 45, 0.15); color: var(--accent); }
+.stat-icon.success { background: rgba(22, 163, 74, 0.15); color: var(--success); }
+.stat-icon.warning { background: rgba(217, 119, 6, 0.15); color: var(--warning); }
+.stat-icon.blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.stat-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
+.stat-value.accent { color: var(--accent); }
+.stat-value.success { color: var(--success); }
+.stat-value.warning { color: var(--warning); }
+.stat-change { font-size: 13px; margin-top: 8px; color: var(--muted); }
+.card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; }
+.grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.stock-list { max-height: 300px; overflow-y: auto; }
+.stock-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.stock-item:last-child { border-bottom: none; }
+.stock-name { font-weight: 500; }
+.stock-count { font-size: 13px; color: var(--danger); font-weight: 600; }
+.top-product { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.top-product:last-child { border-bottom: none; }
+.top-product-rank { width: 28px; height: 28px; border-radius: 6px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; }
+.top-product-info { flex: 1; }
+.top-product-name { font-weight: 500; }
+.top-product-sales { font-size: 13px; color: var(--muted); }
+.top-product-revenue { color: var(--accent); font-weight: 600; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-align: center; padding: 40px 20px; }
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5; }
+.action-section { display: flex; gap: 12px; flex-wrap: wrap; }
+.transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.transaction-item:last-child { border-bottom: none; }
+.transaction-info { flex: 1; }
+.transaction-id { font-weight: 600; margin-bottom: 4px; }
+.transaction-date { font-size: 13px; color: var(--muted); }
+.transaction-items { font-size: 13px; color: var(--muted); }
+.transaction-amount { color: var(--accent); font-weight: 700; font-size: 16px; }
+.mobile-nav { display: block; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+.mobile-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: 0 auto; }
+.mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; color: var(--muted); font-size: 11px; padding: 8px 16px; text-decoration: none; cursor: pointer; }
+.mobile-nav-btn.active { color: var(--accent); }
+.mobile-nav-btn svg { width: 24px; height: 24px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+@media (max-width: 1024px) {.stats-grid { grid-template-columns: repeat(2, 1fr); }.grid-2 { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {.mobile-nav { display: block; } body { padding-bottom: 70px; } h1 { font-size: 20px; }.header { flex-direction: column; align-items: stretch; }.stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }.stat-card { padding: 16px; }.stat-value { font-size: 22px; }.action-section { flex-direction: column; }.action-section.btn { width: 100%; } }
+@media (max-width: 480px) {.stats-grid { grid-template-columns: 1fr; }.container { padding: 12px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📊 Dashboard</h1>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon accent">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="stat-label">Today's Sales</div>
+      <div class="stat-value accent" id="todaySales">₱0.00</div>
+      <div class="stat-change" id="todayTransactions">0 transactions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value" id="totalRevenue">₱0.00</div>
+      <div class="stat-change" id="totalTransactions">0 transactions total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="stat-label">Yesterday Sales</div>
+      <div class="stat-value warning" id="yesterdaySales">₱0.00</div>
+      <div class="stat-change" id="yesterdayTransactions">0 transactions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      </div>
+      <div class="stat-label">Total Products</div>
+      <div class="stat-value success" id="totalProducts">0</div>
+      <div class="stat-change" id="activeProducts">0 active</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Top Selling Products</span></div>
+      <div id="topProducts">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <p>No sales data yet</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Low Stock Alert</span></div>
+      <div class="stock-list" id="lowStockList">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <p>All items are well stocked</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-header"><span class="card-title">Recent Transactions</span></div>
+    <div id="recentTransactions" style="max-height: 400px; overflow-y: auto;">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <p>No transactions yet</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Section -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Actions</span></div>
+    <div class="action-section">
+      <button class="btn btn-success" onclick="exportData()">Export Backup</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Restore Backup</button>
+      <button class="btn btn-danger" onclick="resetData()">Reset All Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="/" class="mobile-nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Products
+    </a>
+    <a href="/" class="mobile-nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Sale
+    </a>
+    <button class="mobile-nav-btn active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Dashboard
+    </button>
+  </div>
+</nav>
+
+<script>
+const PHP = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+const API = '/api';
+
+async function loadDashboard() {
+  try {
+    const [txnsRes, prodsRes] = await Promise.all([
+      fetch(`${API}/transactions`),
+      fetch(`${API}/products`)
+    ]);
+
+    if (!txnsRes.ok ||!prodsRes.ok) throw new Error('Failed to fetch data');
+
+    const txns = await txnsRes.json();
+    const products = await prodsRes.json();
+
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    const todayTxns = txns.filter(t => new Date(t.date).toDateString() === today);
+    const yesterdayTxns = txns.filter(t => new Date(t.date).toDateString() === yesterday);
+    const todaySales = todayTxns.reduce((sum, t) => sum + t.total, 0);
+    const yesterdaySales = yesterdayTxns.reduce((sum, t) => sum + t.total, 0);
+    const totalRevenue = txns.reduce((sum, t) => sum + t.total, 0);
+
+    // Update stats - force 0 kung walang data
+    document.getElementById('todaySales').textContent = PHP.format(todaySales || 0);
+    document.getElementById('todayTransactions').textContent = `${todayTxns.length} transactions`;
+    document.getElementById('totalRevenue').textContent = PHP.format(totalRevenue || 0);
+    document.getElementById('totalTransactions').textContent = `${txns.length} transactions total`;
+    document.getElementById('yesterdaySales').textContent = PHP.format(yesterdaySales || 0);
+    document.getElementById('yesterdayTransactions').textContent = `${yesterdayTxns.length} transactions`;
+    document.getElementById('totalProducts').textContent = products.length || 0;
+    document.getElementById('activeProducts').textContent = `${products.filter(p => p.stock > 0).length} active`;
+
+    // Top Selling Products
+    const productSales = {};
+    txns.forEach(t => {
+      if (t.items && Array.isArray(t.items)) {
+        t.items.forEach(i => {
+          if(!productSales[i.id]) productSales[i.id] = { name: i.name, qty: 0, revenue: 0 };
+          productSales[i.id].qty += i.qty;
+          productSales[i.id].revenue += i.qty * i.price;
+        });
+      }
+    });
+
+    const topProducts = Object.values(productSales).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    const topProductsEl = document.getElementById('topProducts');
+    topProductsEl.innerHTML = topProducts.length === 0
+    ? `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><p>No sales data yet</p></div>`
+      : topProducts.map((p, idx) => `
+        <div class="top-product">
+          <div class="top-product-rank">${idx + 1}</div>
+          <div class="top-product-info">
+            <div class="top-product-name">${p.name}</div>
+            <div class="top-product-sales">${p.qty} sold</div>
+          </div>
+          <div class="top-product-revenue">${PHP.format(p.revenue)}</div>
+        </div>
+      `).join('');
+
+    // Low Stock Alert
+    const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5);
+    const lowStockEl = document.getElementById('lowStockList');
+    lowStockEl.innerHTML = lowStock.length === 0
+    ? `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>All items are well stocked</p></div>`
+      : lowStock.map(p => `
+        <div class="stock-item">
+          <span class="stock-name">${p.name}</span>
+          <span class="stock-count">${p.stock} ${p.unit}</span>
+        </div>
+      `).join('');
+
+    // Recent Transactions
+    const recentTxnsEl = document.getElementById('recentTransactions');
+    recentTxnsEl.innerHTML = txns.length === 0
+    ? `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p>No transactions yet</p></div>`
+      : txns.slice(-10).reverse().map(t => `
+        <div class="transaction-item">
+          <div class="transaction-info">
+            <div class="transaction-id">TXN-${t.id}</div>
+            <div class="transaction-date">${new Date(t.date).toLocaleString('en-PH')}</div>
+            <div class="transaction-items">${t.items? t.items.map(i => `${i.name} x${i.qty}`).join(', ') : ''}</div>
+          </div>
+          <div class="transaction-amount">${PHP.format(t.total)}</div>
+        </div>
+      `).join('');
+  } catch(e) {
+    console.error('Dashboard error:', e);
+  }
+}
+
+async function exportData() {
+  try {
+    const [txns, products] = await Promise.all([
+      fetch(`${API}/transactions`).then(r => r.json()),
+      fetch(`${API}/products`).then(r => r.json())
+    ]);
+    const backup = { products, transactions: txns, date: new Date().toISOString(), version: '1.0' };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sari-sari-backup-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('✅ Backup downloaded!');
+  } catch(e) {
+    alert('❌ Export failed: ' + e.message);
+  }
+}
+
+async function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const backup = JSON.parse(text);
+
+    if (!backup.products ||!backup.transactions) {
+      throw new Error('Invalid backup file');
+    }
+
+    const res = await fetch(`${API}/restore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(backup)
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Restore failed');
+
+    alert('✅ Backup restored! Refreshing...');
+    await loadDashboard();
+    setTimeout(() => location.reload(), 500);
+  } catch(e) {
+    alert('❌ Import failed: ' + e.message);
+  }
+  event.target.value = '';
+}
+
+async function resetData() {
+  if(!confirm('⚠️ DELETE ALL DATA? Transactions + Products mabubura lahat. Di na mababalik!')) return;
+
+  try {
+    const res = await fetch(`${API}/reset`, { method: 'POST' });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Reset failed');
+
+    alert('✅ All data deleted!');
+
+    // Force 0 lahat sa UI bago mag-reload
+    document.getElementById('todaySales').textContent = '₱0.00';
+    document.getElementById('todayTransactions').textContent = '0 transactions';
+    document.getElementById('totalRevenue').textContent = '₱0.00';
+    document.getElementById('totalTransactions').textContent = '0 transactions total';
+    document.getElementById('yesterdaySales').textContent = '₱0.00';
+    document.getElementById('yesterdayTransactions').textContent = '0 transactions';
+    document.getElementById('totalProducts').textContent = '0';
+    document.getElementById('activeProducts').textContent = '0 active';
+    document.getElementById('topProducts').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><p>No sales data yet</p></div>`;
+    document.getElementById('lowStockList').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>All items are well stocked</p></div>`;
+    document.getElementById('recentTransactions').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p>No transactions yet</p></div>`;
+
+    setTimeout(() => location.reload(), 300);
+
+  } catch(e) {
+    alert('❌ Reset failed: ' + e.message);
+  }
+}
+
+loadDashboard();
+setInterval(loadDashboard, 5000);
+</script>
+</body>
+</html>
